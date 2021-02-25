@@ -9,12 +9,6 @@ inputs:
   upstream:
     description: 'Upstream repository owner/name. For example, exions/merge-upstream'
     required: true
-  upstream-branch:
-    description: 'Upstream branch to merge from. For example, master'
-    default: 'master'
-  branch:
-    description: 'Branch to merge to. For example, master'
-    default: 'master'
   token:
     description: >
       Personal access token (PAT) used to fetch the repository. The PAT is configured
@@ -33,7 +27,10 @@ runs:
         git remote -v
         git branch --all
         git config --list
-        git checkout ${{ inputs.branch }}
-        git merge --ff-only upstream/${{ inputs.upstream-branch }}
-        git push 
+        git branch -r | grep -v '\->' | grep -v 'upstream' | while read remote; \
+          do \
+            git checkout ${remote#origin/}; \
+            git merge --ff-only upstream/${remote#origin/}; \
+            git push; \
+          done
       shell: bash
